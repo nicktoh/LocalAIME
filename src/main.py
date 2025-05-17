@@ -4,12 +4,11 @@ import argparse
 
 from tqdm import tqdm
 
+from evaluator import ask_llm_aime
 from utils.llm import LLM
-from utils.logger import Logger
 
 AIME_DATASET = 'resources/aime2024.parquet'
 PROMPT = 'Given the problem above, reply with the number inside \\boxed{} to provide the final answer.'
-ANSWER_REGEX = r'\\boxed{((?:\\[a-z]+|{[^{}]*}|[^{}])+)}'
 MAX_TOKENS = 8000
 
 
@@ -20,27 +19,6 @@ def load_aime_dataset() -> list[tuple[int, str, int]]:
     problems = dataset['problem'].tolist()
     answers = dataset['answer'].astype(int).tolist()
     return list(zip(ids, problems, answers))
-
-
-def ask_llm(llm: LLM, problem: str) -> int | None:
-    prompt = f'{problem}\n\n{PROMPT}\n\n/no_think'
-
-    response = llm.get_answer(prompt, MAX_TOKENS)
-
-    if not response:
-        return None
-    
-    try:
-        match = re.search(ANSWER_REGEX, response)
-        if match:
-            answer = int(match.group(1))
-            return answer
-        else:
-            Logger.warning('ask_llm', f'The LLM response was not found')
-    except Exception as e:
-        Logger.warning('ask_llm', f'The LLM response was not an integer: {e}')
-        return None
-
 
 
 def main():
@@ -54,7 +32,12 @@ def main():
     llm = LLM(args.base_url, args.model, args.api_key)
 
     for id, problem, solution in tqdm(aime, desc='Testing on AIME', ncols=100, unit='problem'):
-        llm_solution = ask_llm(llm, problem)
+        llm_solution = ask_llm_aime(
+            llm=llm, 
+            problem=problem,
+            prompt=PROMPT,
+            max_tokens=8000
+        )
 
         if not llm_solution:
             tqdm.write(f'{id}: ❕ Missing')
