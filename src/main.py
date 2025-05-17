@@ -36,7 +36,9 @@ def main():
             llm=llm, 
             problem=problem,
             prompt=PROMPT,
-            max_tokens=8000
+            max_tokens=MAX_TOKENS,
+            qwen3_nothink=True,
+            verbose=False
         )
 
         if not llm_solution:
