@@ -88,7 +88,7 @@ def main():
     if not args.output:
         args.output = f'{args.model}.json'
 
-    aime = load_aime_dataset()[:3]
+    aime = load_aime_dataset()
     llm = LLM(args.base_url, args.model, args.api_key)
     results = []
 
