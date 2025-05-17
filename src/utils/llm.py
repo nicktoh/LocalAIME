@@ -11,7 +11,7 @@ class LLM:
         
         self.client = openai.OpenAI(base_url=self.base_url, api_key=self.api_key)
     
-    def get_answer(self, question: str, max_tokens: int) -> str | None:
+    def get_answer(self, question: str, max_tokens: int, timeout: float) -> str | None:
         messages=[
             {"role": "user", "content": question}
         ]
@@ -21,16 +21,17 @@ class LLM:
                 messages=messages,  # type: ignore
                 model=self.model,
                 max_tokens=max_tokens,
-                stream=False
+                stream=False,
+                timeout=timeout
             )  # type: ignore
-        except Exception:
-            Logger.error('get_answer', f'Unable to connect to the OpenAI API at {self.base_url}')
+        except Exception as e:
+            Logger.error('get_answer', f'API error occurred at {self.base_url}: {e}')
             return None
 
         try:
             response_text = response.choices[0].message.content.strip()  # type: ignore
-        except Exception:
-            Logger.error('get_answer', f'The response from the model was invalid (no content)')
+        except Exception as e:
+            Logger.error('get_answer', f'The response from the model was invalid (no content): {e}')
             return None
         
         return response_text

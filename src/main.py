@@ -11,7 +11,8 @@ from utils.logger import Logger
 
 AIME_DATASET = 'resources/aime2024.parquet'
 PROMPT = 'Given the problem above, reply with the number inside \\boxed{} to provide the final answer.'
-MAX_TOKENS = 8000
+MAX_TOKENS = 16000
+TIMEOUT_SECS = 10*60  # 10 minutes timeout
 
 
 class ResultType(Enum):
@@ -98,8 +99,9 @@ def main():
             problem=problem,
             prompt=PROMPT,
             max_tokens=MAX_TOKENS,
-            qwen3_nothink=True,
-            verbose=False
+            qwen3_nothink=False,
+            verbose=True,
+            timeout=TIMEOUT_SECS
         )
 
         if not llm_solution:
