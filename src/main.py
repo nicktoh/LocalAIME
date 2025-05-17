@@ -11,8 +11,8 @@ from utils.logger import Logger
 
 AIME_DATASET = 'resources/aime2024.parquet'
 PROMPT = 'Given the problem above, reply with the number inside \\boxed{} to provide the final answer.'
-MAX_TOKENS = 16000
-TIMEOUT_SECS = 10*60  # 10 minutes timeout
+DEFAULT_MAX_TOKENS = 16000
+DEFAULT_TIMEOUT_SECS = 10 * 60  # 10 minutes timeout
 
 
 class ResultType(Enum):
@@ -83,6 +83,9 @@ def main():
     parser.add_argument('--base-url', type=str, required=True, help='Base URL for the OpenAI-compatible API')
     parser.add_argument('--model', type=str, required=True, help='Name of the model to test')
     parser.add_argument('--api-key', type=str, required=False, default='none', help='API key for the OpenAI-compatible API (optional)')
+    parser.add_argument('--max-tokens', type=int, required=False, default=DEFAULT_MAX_TOKENS, help=f'Maximum number of tokens to generate (default: {DEFAULT_MAX_TOKENS})')
+    parser.add_argument('--timeout', type=int, required=False, default=DEFAULT_TIMEOUT_SECS, help=f'Timeout in seconds for each request (default: {DEFAULT_TIMEOUT_SECS})')
+    parser.add_argument('--disable-qwen3-thinking', action='store_true', help='Disable Qwen3 thinking mode')
     parser.add_argument('-o', '--output', type=str, required=False, default=None, help='Where to write the resulting JSON')
     args = parser.parse_args()
 
@@ -98,10 +101,10 @@ def main():
             llm=llm, 
             problem=problem,
             prompt=PROMPT,
-            max_tokens=MAX_TOKENS,
-            qwen3_nothink=False,
+            max_tokens=args.max_tokens,
+            qwen3_nothink=args.disable_qwen3_thinking,
             verbose=True,
-            timeout=TIMEOUT_SECS
+            timeout=args.timeout
         )
 
         if not llm_solution:
