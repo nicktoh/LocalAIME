@@ -4,7 +4,7 @@ import argparse
 
 from tqdm import tqdm
 
-from utils.llm_evaluator import LLM
+from utils.llm import LLM
 from utils.logger import Logger
 
 AIME_DATASET = 'resources/aime2024.parquet'
