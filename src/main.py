@@ -1,4 +1,6 @@
-import re
+from dataclasses import dataclass
+from enum import Enum
+import json
 import pandas as pd
 import argparse
 
@@ -6,10 +8,48 @@ from tqdm import tqdm
 
 from evaluator import ask_llm_aime
 from utils.llm import LLM
+from utils.logger import Logger
 
 AIME_DATASET = 'resources/aime2024.parquet'
 PROMPT = 'Given the problem above, reply with the number inside \\boxed{} to provide the final answer.'
 MAX_TOKENS = 8000
+
+
+class ResultType(Enum):
+    CORRECT = "correct"
+    WRONG = "wrong"
+    MISSING = "missing"
+
+
+@dataclass
+class AIMEResult:
+    problem_id: int
+    problem_text: str
+    response_text: str | None
+    response_int: int | None
+    expected_int: int
+    result_type: ResultType
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'AIMEResult':
+        return cls(
+            problem_id=data['problem_id'],
+            problem_text=data['problem_text'],
+            response_text=data.get('response_text'),
+            response_int=data.get('response_int'),
+            expected_int=data['expected_int'],
+            result_type=ResultType(data['result_type'])
+        )
+    
+    def to_dict(self) -> dict[str, int | str | None]:
+        return {
+            'problem_id': self.problem_id,
+            'problem_text': self.problem_text,
+            'response_text': self.response_text,
+            'response_int': self.response_int,
+            'expected_int': self.expected_int,
+            'result_type': self.result_type.value
+        }
 
 
 def load_aime_dataset() -> list[tuple[int, str, int]]:
@@ -26,13 +66,18 @@ def main():
     parser.add_argument('--base-url', type=str, required=True, help='Base URL for the OpenAI-compatible API')
     parser.add_argument('--model', type=str, required=True, help='Name of the model to test')
     parser.add_argument('--api-key', type=str, required=False, default='none', help='API key for the OpenAI-compatible API (optional)')
+    parser.add_argument('-o', '--output', type=str, required=False, default=None, help='Where to write the resulting JSON')
     args = parser.parse_args()
 
-    aime = load_aime_dataset()
+    if not args.output:
+        args.output = f'{args.model}.json'
+
+    aime = load_aime_dataset()[:3]
     llm = LLM(args.base_url, args.model, args.api_key)
+    results = []
 
     for id, problem, solution in tqdm(aime, desc='Testing on AIME', ncols=100, unit='problem'):
-        llm_solution = ask_llm_aime(
+        llm_solution, llm_response = ask_llm_aime(
             llm=llm, 
             problem=problem,
             prompt=PROMPT,
@@ -42,13 +87,27 @@ def main():
         )
 
         if not llm_solution:
+            result_type = ResultType.MISSING
             tqdm.write(f'{id}: ❕ Missing')
-            continue
-
-        if llm_solution == solution:
+        elif llm_solution == solution:
+            result_type = ResultType.CORRECT
             tqdm.write(f'{id}: ✅ Correct')
         else:
+            result_type = ResultType.WRONG
             tqdm.write(f'{id}: ❌ Wrong')
+        
+        results.append(AIMEResult(
+            problem_id=id,
+            problem_text=problem,
+            response_text=llm_response,
+            response_int=llm_solution,
+            expected_int=solution,
+            result_type=result_type
+        ))
+
+    Logger.info('main', f'Saving results to {args.output}')
+    with open(args.output, 'w') as f:
+        json.dump([result.to_dict() for result in results], f, indent=2)
 
 
 if __name__ == '__main__':
