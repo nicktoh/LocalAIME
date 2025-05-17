@@ -18,17 +18,17 @@ class LLM:
 
         try:
             response: ChatCompletion = self.client.chat.completions.create(
-                messages=messages,
+                messages=messages,  # type: ignore
                 model=self.model,
                 max_tokens=max_tokens,
                 stream=False
-            )
+            )  # type: ignore
         except Exception:
             Logger.error('get_answer', f'Unable to connect to the OpenAI API at {self.base_url}')
             return None
 
         try:
-            response_text = response.choices[0].message.content.strip()
+            response_text = response.choices[0].message.content.strip()  # type: ignore
         except Exception:
             Logger.error('get_answer', f'The response from the model was invalid (no content)')
             return None
