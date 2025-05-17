@@ -3,7 +3,6 @@ from enum import Enum
 import json
 import pandas as pd
 import argparse
-
 from tqdm import tqdm
 
 from evaluator import ask_llm_aime
@@ -61,6 +60,23 @@ def load_aime_dataset() -> list[tuple[int, str, int]]:
     return list(zip(ids, problems, answers))
 
 
+def calculate_stats(results: list[AIMEResult]) -> dict:
+    total = len(results)
+    correct = sum(1 for r in results if r.result_type == ResultType.CORRECT)
+    wrong = sum(1 for r in results if r.result_type == ResultType.WRONG)
+    missing = sum(1 for r in results if r.result_type == ResultType.MISSING)
+    
+    return {
+        'total_problems': total,
+        'correct': correct,
+        'wrong': wrong,
+        'missing': missing,
+        'correct_percentage': (correct / total) * 100 if total > 0 else 0,
+        'wrong_percentage': (wrong / total) * 100 if total > 0 else 0,
+        'missing_percentage': (missing / total) * 100 if total > 0 else 0
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description='Process AIME dataset with specified model.')
     parser.add_argument('--base-url', type=str, required=True, help='Base URL for the OpenAI-compatible API')
@@ -105,9 +121,19 @@ def main():
             result_type=result_type
         ))
 
+    stats = calculate_stats(results)
+    metadata = {
+        'model_name': args.model,
+        'stats': stats
+    }
+    output_data = {
+        'metadata': metadata,
+        'results': [result.to_dict() for result in results]
+    }
+
     Logger.info('main', f'Saving results to {args.output}')
     with open(args.output, 'w') as f:
-        json.dump([result.to_dict() for result in results], f, indent=2)
+        json.dump(output_data, f, indent=2)
 
 
 if __name__ == '__main__':
