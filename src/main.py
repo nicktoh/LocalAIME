@@ -13,6 +13,7 @@ AIME_DATASET = 'resources/aime2024.parquet'
 PROMPT = 'Given the problem above, reply with the number inside \\boxed{} to provide the final answer.'
 DEFAULT_MAX_TOKENS = 16000
 DEFAULT_TIMEOUT_SECS = 10 * 60  # 10 minutes timeout
+DEFAULT_PROBLEM_TRIES = 1
 
 
 class ResultType(Enum):
@@ -65,24 +66,38 @@ def load_aime_dataset() -> list[tuple[int, str, int]]:
 
 
 def calculate_stats(results: list[AIMEResult]) -> dict:
-    total = len(results)
+    total_attempts = len(results)
     correct = sum(1 for r in results if r.result_type == ResultType.CORRECT)
     wrong = sum(1 for r in results if r.result_type == ResultType.WRONG)
     missing = sum(1 for r in results if r.result_type == ResultType.MISSING)
     
+    # Calculate per-problem stats
+    problem_results = {}
+    for result in results:
+        if result.problem_id not in problem_results:
+            problem_results[result.problem_id] = []
+        problem_results[result.problem_id].append(result)
+    
+    total_problems = len(problem_results)
+    problems_with_correct = sum(
+        1 for attempts in problem_results.values() 
+        if any(r.result_type == ResultType.CORRECT for r in attempts)
+    )
+    
     return {
-        'total_problems': total,
-        'correct': correct,
-        'wrong': wrong,
-        'missing': missing,
-        'correct_percentage': (correct / total) * 100 if total > 0 else 0,
-        'wrong_percentage': (wrong / total) * 100 if total > 0 else 0,
-        'missing_percentage': (missing / total) * 100 if total > 0 else 0
+        'total_problems': total_problems,
+        'total_attempts': total_attempts,
+        'correct_attempts': correct,
+        'wrong_attempts': wrong,
+        'missing_attempts': missing,
+        'problems_with_correct': problems_with_correct,
+        'attempt_accuracy': (correct / total_attempts) * 100 if total_attempts > 0 else 0,
+        'problem_accuracy': (problems_with_correct / total_problems) * 100 if total_problems > 0 else 0
     }
 
 
 def main():
-    global AIME_DATASET, PROMPT, DEFAULT_MAX_TOKENS, DEFAULT_TIMEOUT_SECS
+    global AIME_DATASET, PROMPT, DEFAULT_MAX_TOKENS, DEFAULT_TIMEOUT_SECS, DEFAULT_PROBLEM_TRIES
     
     parser = argparse.ArgumentParser(description='Process AIME dataset with specified model.')
     parser.add_argument('--base-url', type=str, required=True, help='Base URL for the OpenAI-compatible API')
@@ -91,6 +106,7 @@ def main():
     parser.add_argument('--max-tokens', type=int, required=False, default=DEFAULT_MAX_TOKENS, help=f'Maximum number of tokens to generate (default: {DEFAULT_MAX_TOKENS})')
     parser.add_argument('--timeout', type=int, required=False, default=DEFAULT_TIMEOUT_SECS, help=f'Timeout in seconds for each request (default: {DEFAULT_TIMEOUT_SECS})')
     parser.add_argument('--disable-qwen3-thinking', action='store_true', help='Disable Qwen3 thinking mode')
+    parser.add_argument('--problem-tries', type=int, required=False, default=DEFAULT_PROBLEM_TRIES, help=f'Number of attempts per problem (default: {DEFAULT_PROBLEM_TRIES})')
     parser.add_argument('-o', '--output', type=str, required=False, default=None, help='Where to write the resulting JSON')
     args = parser.parse_args()
 
@@ -106,38 +122,40 @@ def main():
     results = []
 
     for id, problem, solution in tqdm(aime, desc='Testing on AIME', ncols=100, unit='problem'):
-        llm_solution, llm_response, llm_generated_tokens = ask_llm_aime(
-            llm=llm, 
-            problem=problem,
-            prompt=PROMPT,
-            max_tokens=args.max_tokens,
-            verbose=True,
-            timeout=args.timeout
-        )
+        for attempt in range(args.problem_tries):
+            llm_solution, llm_response, llm_generated_tokens = ask_llm_aime(
+                llm=llm, 
+                problem=problem,
+                prompt=PROMPT,
+                max_tokens=args.max_tokens,
+                verbose=True,
+                timeout=args.timeout
+            )
 
-        if not llm_solution:
-            result_type = ResultType.MISSING
-            tqdm.write(f'{id}: ❕ Missing')
-        elif llm_solution == solution:
-            result_type = ResultType.CORRECT
-            tqdm.write(f'{id}: ✅ Correct')
-        else:
-            result_type = ResultType.WRONG
-            tqdm.write(f'{id}: ❌ Wrong')
-        
-        results.append(AIMEResult(
-            problem_id=id,
-            problem_text=problem,
-            response_text=llm_response,
-            response_int=llm_solution,
-            expected_int=solution,
-            generated_tokens=llm_generated_tokens,
-            result_type=result_type
-        ))
+            if not llm_solution:
+                result_type = ResultType.MISSING
+                tqdm.write(f'Problem {id}: ❕ Missing (attempt {attempt + 1}/{args.problem_tries})')
+            elif llm_solution == solution:
+                result_type = ResultType.CORRECT
+                tqdm.write(f'Problem {id}: ✅ Correct (attempt {attempt + 1}/{args.problem_tries})')
+            else:
+                result_type = ResultType.WRONG
+                tqdm.write(f'Problem {id}: ❌ Wrong (attempt {attempt + 1}/{args.problem_tries})')
+            
+            results.append(AIMEResult(
+                problem_id=id,
+                problem_text=problem,
+                response_text=llm_response,
+                response_int=llm_solution,
+                expected_int=solution,
+                generated_tokens=llm_generated_tokens,
+                result_type=result_type
+            ))
 
     stats = calculate_stats(results)
     metadata = {
         'model_name': args.model,
+        'problem_tries': args.problem_tries,
         'stats': stats
     }
     output_data = {
