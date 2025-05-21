@@ -28,6 +28,7 @@ class AIMEResult:
     response_text: str | None
     response_int: int | None
     expected_int: int
+    generated_tokens: int | None
     result_type: ResultType
     
     @classmethod
@@ -38,6 +39,7 @@ class AIMEResult:
             response_text=data.get('response_text'),
             response_int=data.get('response_int'),
             expected_int=data['expected_int'],
+            generated_tokens=data.get('generated_tokens'),
             result_type=ResultType(data['result_type'])
         )
     
@@ -48,6 +50,7 @@ class AIMEResult:
             'response_text': self.response_text,
             'response_int': self.response_int,
             'expected_int': self.expected_int,
+            'generated_tokens': self.generated_tokens,
             'result_type': self.result_type.value
         }
 
@@ -97,7 +100,7 @@ def main():
     results = []
 
     for id, problem, solution in tqdm(aime, desc='Testing on AIME', ncols=100, unit='problem'):
-        llm_solution, llm_response = ask_llm_aime(
+        llm_solution, llm_response, llm_generated_tokens = ask_llm_aime(
             llm=llm, 
             problem=problem,
             prompt=PROMPT,
@@ -123,6 +126,7 @@ def main():
             response_text=llm_response,
             response_int=llm_solution,
             expected_int=solution,
+            generated_tokens=llm_generated_tokens,
             result_type=result_type
         ))
 
