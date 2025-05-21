@@ -11,15 +11,10 @@ def ask_llm_aime(
     problem: str,
     prompt: str,
     max_tokens: int,
-    qwen3_nothink: bool = False,
     verbose: bool = False,
     timeout: float = 60*10
 ) -> tuple[int | None, str | None, int | None]:
     prompt = f'{problem}\n\n{prompt}'
-
-    if qwen3_nothink and 'qwen3' in llm.model.lower():
-        prompt += '\n\n/no_think'
-        Logger.info('ask_llm_aime', 'Appending /no_think to prompt for Qwen3', verbose)
 
     response_text, response_tokens = llm.get_answer(prompt, max_tokens, timeout)
 

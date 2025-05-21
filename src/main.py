@@ -82,6 +82,8 @@ def calculate_stats(results: list[AIMEResult]) -> dict:
 
 
 def main():
+    global AIME_DATASET, PROMPT, DEFAULT_MAX_TOKENS, DEFAULT_TIMEOUT_SECS
+    
     parser = argparse.ArgumentParser(description='Process AIME dataset with specified model.')
     parser.add_argument('--base-url', type=str, required=True, help='Base URL for the OpenAI-compatible API')
     parser.add_argument('--model', type=str, required=True, help='Name of the model to test')
@@ -94,6 +96,10 @@ def main():
 
     if not args.output:
         args.output = f'{args.model}.json'
+        
+    if args.disable_qwen3_thinking and 'qwen3' in args.model.lower():
+        PROMPT += '\n\n/no_think'
+        Logger.info('main', 'Appending /no_think to prompt for Qwen3')
 
     aime = load_aime_dataset()
     llm = LLM(args.base_url, args.model, args.api_key)
@@ -105,7 +111,6 @@ def main():
             problem=problem,
             prompt=PROMPT,
             max_tokens=args.max_tokens,
-            qwen3_nothink=args.disable_qwen3_thinking,
             verbose=True,
             timeout=args.timeout
         )
