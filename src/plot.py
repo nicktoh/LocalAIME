@@ -45,9 +45,9 @@ def plot_accuracy_vs_tokens(results: dict[str, dict], output_dir: str):
                     xytext=(5, 5), textcoords='offset points', 
                     fontsize=8, alpha=0.8)
     
-    plt.xlabel('Average Tokens Generated', fontsize=12)
-    plt.ylabel('Problem Accuracy (%)', fontsize=12)
-    plt.title('Model Performance vs Token Generation', fontsize=14)
+    plt.xlabel('Average tokens generated', fontsize=12)
+    plt.ylabel('Problem accuracy (%)', fontsize=12)
+    plt.title('Model performance vs tokens generated', fontsize=14)
     plt.grid(True, alpha=0.3, zorder=0)
     plt.tight_layout()
     
@@ -69,8 +69,8 @@ def plot_accuracy_bars(results: dict[str, dict], output_dir: str):
     
     fig, ax = plt.subplots(figsize=(12, 6))
     
-    bars1 = ax.bar(x - width/2, problem_acc, width, label='Problem Accuracy', alpha=0.8)
-    bars2 = ax.bar(x + width/2, attempt_acc, width, label='Attempt Accuracy', alpha=0.8)
+    bars1 = ax.bar(x - width/2, problem_acc, width, label='Problem accuracy', alpha=0.8)
+    bars2 = ax.bar(x + width/2, attempt_acc, width, label='Attempt accuracy', alpha=0.8)
     
     # Add value labels on bars
     for bars in [bars1, bars2]:
@@ -80,7 +80,7 @@ def plot_accuracy_bars(results: dict[str, dict], output_dir: str):
     
     ax.set_xlabel('Model', fontsize=12)
     ax.set_ylabel('Accuracy (%)', fontsize=12)
-    ax.set_title('Model Performance Comparison', fontsize=14)
+    ax.set_title('Model performance comparison', fontsize=14)
     ax.set_xticks(x)
     ax.set_xticklabels(models, rotation=45, ha='right')
     ax.legend()
@@ -152,9 +152,9 @@ def plot_heatmap(results: dict[str, dict], output_dir: str):
         square=True
     )
     
-    plt.xlabel('Problem ID (Easiest → Hardest)', fontsize=12)
-    plt.ylabel('Model (Best → Worst)', fontsize=12)
-    plt.title('Model Performance Heatmap by Problem', fontsize=14)
+    plt.xlabel('Problem ID', fontsize=12)
+    plt.ylabel('Model', fontsize=12)
+    plt.title('Model performance heatmap', fontsize=14)
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
     
@@ -164,7 +164,7 @@ def plot_heatmap(results: dict[str, dict], output_dir: str):
     print(f"Saved performance heatmap to {output_path}")
 
 def main():
-    parser = argparse.ArgumentParser(description='Plot AIME evaluation results')
+    parser = argparse.ArgumentParser(description='Plot results')
     parser.add_argument('directory', type=str, help='Directory containing JSON result files')
     parser.add_argument('-o', '--output-dir', type=str, default='plots', help='Output directory for plots (default: plots)')
     args = parser.parse_args()
