@@ -2,6 +2,14 @@
 
 This simple tool tests local (or not) LLMs on the AIME problems. Even if some models are specifically trained to solve AIME-style problems or even trained specifically on some of them (by accident or purpose), it is still useful for comparing the same models of the same family or different quantizations of the same exact model. It would also be interesting to test same model, same quantization, but from different sources on huggingfcace.
 
+## Example results
+
+<div align="center">
+    <img alt="Plot image" src="media/accuracy_comparison.png" width="70%">
+    </br>
+    <img alt="Plot image" src="media/performance_heatmap.png" width="90%">
+</div>
+
 ## Setup
 
 First of all prepare the project for the first test:
