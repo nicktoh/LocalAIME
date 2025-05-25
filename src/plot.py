@@ -48,7 +48,7 @@ def plot_accuracy_vs_tokens(results: dict[str, dict], output_dir: str):
     plt.xlabel('Average Tokens Generated', fontsize=12)
     plt.ylabel('Problem Accuracy (%)', fontsize=12)
     plt.title('Model Performance vs Token Generation', fontsize=14)
-    plt.grid(True, alpha=0.3)
+    plt.grid(True, alpha=0.3, zorder=0)
     plt.tight_layout()
     
     output_path = os.path.join(output_dir, 'accuracy_vs_tokens.png')
@@ -84,7 +84,8 @@ def plot_accuracy_bars(results: dict[str, dict], output_dir: str):
     ax.set_xticks(x)
     ax.set_xticklabels(models, rotation=45, ha='right')
     ax.legend()
-    ax.grid(True, axis='y', alpha=0.3)
+    ax.grid(True, axis='y', alpha=0.3, zorder=0)
+    ax.set_axisbelow(True)
     
     plt.tight_layout()
     
