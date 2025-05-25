@@ -81,3 +81,7 @@ python3 src/plot.py results
 ```
 
 Then check the plots inside `plots/`
+
+## Credits
+
+AIME 2024 problems dataset retrieved from [HuggingFaceH4](https://huggingface.co/datasets/HuggingFaceH4/aime_2024)
