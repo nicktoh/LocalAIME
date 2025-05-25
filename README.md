@@ -1,6 +1,6 @@
 # LocalAIME
 
-This simple tool tests local (or not) LLMs on the AIME problems. Even if some models are specifically trained to solve AIME-style problems or even trained specifically on some of them (by accident or purpose), it is still useful for comparing the same models of the same family or different quantizations of the same exact model. It would also be interesting to test same model, same quantization, but from different sources on huggingfcace.
+This simple tool tests local (or not) LLMs on the AIME problems. Even if some models are specifically trained to solve AIME-style problems or even trained specifically on some of them (by accident or purpose), it is still useful for comparing models of the same family or different quantizations of the same exact model. It would also be interesting to test same model, same quantization, but from different sources on huggingfcace.
 
 ## Example results
 
