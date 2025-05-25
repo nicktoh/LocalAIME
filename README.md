@@ -20,7 +20,7 @@ Now you are ready to test a model on AIME 2024. Be sure to match both the `--bas
 
 ### Ollama
 ```sh
-python src/main.py \
+python3 src/main.py \
     --base-url 'http://127.0.0.1:11434/v1' \
     --model 'gemma3:4b' \
     --max-tokens 32000 \
@@ -30,7 +30,7 @@ python src/main.py \
 
 ### LMStudio
 ```sh
-python src/main.py \
+python3 src/main.py \
     --base-url 'http://127.0.0.1:1234/v1' \
     --model 'gemma-3-4b-it-qat' \
     --max-tokens 32000 \
@@ -55,10 +55,21 @@ llama-server \
 
 Then run the benchmark:
 ```sh
-python src/main.py \
+python3 src/main.py \
     --base-url 'http://127.0.0.1:8080/v1' \
     --model 'my-model' \
     --max-tokens 30000 \
     --timeout 2000 \
     --problem-tries 3
 ```
+
+### See results
+
+After the test is finished, you can open the generated `model-name.json` file and check the results.
+
+If you test many models you can also put all of them in a directory (eg. `results/`) and plot the results to get an overview:
+```sh
+python3 src/plot.py results
+```
+
+Then check the plots inside `plots/`
