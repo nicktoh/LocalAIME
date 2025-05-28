@@ -112,6 +112,9 @@ def main():
 
     if not args.output:
         args.output = f'{args.model}.json'
+    
+    if '/' in args.output:
+        args.output = args.output.split('/')[-1]
         
     if args.disable_qwen3_thinking and 'qwen3' in args.model.lower():
         PROMPT += '\n\n/no_think'
