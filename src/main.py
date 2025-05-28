@@ -132,7 +132,7 @@ def main():
                 timeout=args.timeout
             )
 
-            if not llm_solution:
+            if llm_solution == None:
                 result_type = ResultType.MISSING
                 tqdm.write(f'Problem {id}: ❕ Missing (attempt {attempt + 1}/{args.problem_tries})')
             elif llm_solution == solution:
