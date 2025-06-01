@@ -56,6 +56,10 @@ class AIMEResult:
         }
 
 
+def sanitize_filename(filename: str) -> str:
+    return re.sub(r'[<>:"|?*\\/]', '-', filename)
+
+
 def load_aime_dataset() -> list[tuple[int, str, int]]:
     dataset = pd.read_parquet(AIME_DATASET)
 
@@ -111,10 +115,10 @@ def main():
     args = parser.parse_args()
 
     if not args.output:
-        args.output = f'{args.model}.json'
-    
-    if '/' in args.output:
-        args.output = args.output.replace('/', '-')
+        sanitized_model_name = sanitize_filename(args.model)
+        args.output = f'{sanitized_model_name}.json'
+    else:
+        args.output = sanitize_filename(args.output)
         
     if args.disable_qwen3_thinking and 'qwen3' in args.model.lower():
         PROMPT += '\n\n/no_think'
