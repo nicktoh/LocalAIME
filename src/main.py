@@ -3,6 +3,7 @@ from enum import Enum
 import json
 import pandas as pd
 import argparse
+import os
 from tqdm import tqdm
 
 from evaluator import ask_llm_aime
@@ -118,7 +119,10 @@ def main():
         sanitized_model_name = sanitize_filename(args.model)
         args.output = f'{sanitized_model_name}.json'
     else:
-        args.output = sanitize_filename(args.output)
+        path_dir = os.path.dirname(args.output)
+        filename = os.path.basename(args.output)
+        sanitized_filename = sanitize_filename(filename)
+        args.output = os.path.join(path_dir, sanitized_filename) if path_dir else sanitized_filename
         
     if args.disable_qwen3_thinking and 'qwen3' in args.model.lower():
         PROMPT += '\n\n/no_think'
