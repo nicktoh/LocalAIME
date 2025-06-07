@@ -5,6 +5,7 @@ import pandas as pd
 import argparse
 import os
 from tqdm import tqdm
+import re
 
 from evaluator import ask_llm_aime
 from utils.llm import LLM
