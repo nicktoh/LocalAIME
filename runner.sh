@@ -53,16 +53,16 @@ echo "• Endpoint: $base_url"
 
 # Define quantization variants
 base_variants=(
-    "hf.co/quant_name/model_name-GGUF:Q4_K_M"
-    "hf.co/quant_name/model_name-GGUF:Q5_K_M"
-    "hf.co/quant_name/model_name-GGUF:Q6_K"
-    "hf.co/quant_name/model_name-GGUF:Q8_0"
+    "Q4_K_M"
+    "Q5_K_M"
+    "Q6_K"
+    "Q8_0"
 )
 unsloth_variants=(
-    "hf.co/quant_name/model_name-GGUF:Q4_K_XL"
-    "hf.co/quant_name/model_name-GGUF:Q5_K_XL"
-    "hf.co/quant_name/model_name-GGUF:Q6_K_XL"
-    "hf.co/quant_name/model_name-GGUF:Q8_K_XL"
+    "Q4_K_XL"
+    "Q5_K_XL"
+    "Q6_K_XL"
+    "Q8_K_XL"
 )
 
 # Select variants based on quant group
