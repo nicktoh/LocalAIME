@@ -3,7 +3,7 @@ from utils.llm import LLM
 from utils.logger import Logger
 
 
-ANSWER_REGEX = r'\\boxed{((?:\\[a-z]+|{[^{}]*}|[^{}])+)}'
+ANSWER_REGEX = r'\\boxed\{\s*(\d+)\s*\}'
 
 
 def ask_llm_aime(
