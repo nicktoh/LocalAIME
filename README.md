@@ -1,6 +1,8 @@
 # LocalAIME
 
-This simple tool tests local (or not) LLMs on the AIME problems. Even if some models are specifically trained to solve AIME-style problems or even trained specifically on some of them (by accident or purpose), it is still useful for comparing models of the same family or different quantizations of the same exact model. It would also be interesting to test same model, same quantization, but from different sources on huggingfcace.
+This simple tool tests local (or not) LLMs on the AIME problems. Even if some models are specifically trained to solve AIME-style problems or even trained specifically on some of them (by accident or purpose), it is still useful for comparing models of the same family or different quantizations of the same exact model. It would also be interesting to test same model, same quantization, but from different sources on huggingface.
+
+Forked from Belluxx/LocalAIME with some improvements.
 
 ## Example results
 
@@ -14,7 +16,7 @@ This simple tool tests local (or not) LLMs on the AIME problems. Even if some mo
 
 First of all prepare the project for the first test:
 ```sh
-git clone https://github.com/Belluxx/LocalAIME.git
+git clone https://github.com/nicktoh/LocalAIME.git
 cd LocalAIME
 python3 -m venv .venv
 source .venv/bin/activate
